@@ -110,7 +110,7 @@ export default function ChatWindow() {
             </div>
 
             {/* Input Area */}
-            <ChatInput onSendMessage={handleSendMessage} />
+            <ChatInput onSend={handleSendMessage} />
         </div>
     );
 }
