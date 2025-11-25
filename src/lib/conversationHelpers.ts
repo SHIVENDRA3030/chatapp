@@ -30,66 +30,13 @@ export async function getOrCreateDirectConversation(
     targetUserId: string
 ): Promise<{ conversationId: string; error: Error | null }> {
     try {
-        // 1. Get all conversation IDs for the current user
-        const { data: currentUserConvs, error: error1 } = await supabase
-            .from('conversation_participants')
-            .select('conversation_id')
-            .eq('user_id', currentUserId);
+        const { data, error } = await supabase.rpc('get_or_create_direct_conversation', {
+            other_user_id: targetUserId
+        });
 
-        if (error1) throw error1;
+        if (error) throw error;
 
-        const currentUserConvIds = currentUserConvs?.map(c => c.conversation_id) || [];
-
-        if (currentUserConvIds.length > 0) {
-            // 2. Check if the target user is in any of these conversations
-            // This is RLS-safe because we are querying conversations we are already part of
-            const { data: commonParticipants, error: error2 } = await supabase
-                .from('conversation_participants')
-                .select('conversation_id')
-                .in('conversation_id', currentUserConvIds)
-                .eq('user_id', targetUserId);
-
-            if (error2) throw error2;
-
-            const commonConvIds = commonParticipants?.map(c => c.conversation_id) || [];
-
-            if (commonConvIds.length > 0) {
-                // 3. Check if any of these are NOT a group chat
-                const { data: directConvs, error: error3 } = await supabase
-                    .from('conversations')
-                    .select('id')
-                    .in('id', commonConvIds)
-                    .eq('is_group', false)
-                    .limit(1);
-
-                if (error3) throw error3;
-
-                if (directConvs && directConvs.length > 0) {
-                    return { conversationId: directConvs[0].id, error: null };
-                }
-            }
-        }
-
-        // 4. Create new conversation
-        const { data: newConversation, error: createError } = await supabase
-            .from('conversations')
-            .insert({ is_group: false })
-            .select()
-            .single();
-
-        if (createError) throw createError;
-
-        // 5. Add participants
-        const { error: participantsError } = await supabase
-            .from('conversation_participants')
-            .insert([
-                { conversation_id: newConversation.id, user_id: currentUserId },
-                { conversation_id: newConversation.id, user_id: targetUserId }
-            ]);
-
-        if (participantsError) throw participantsError;
-
-        return { conversationId: newConversation.id, error: null };
+        return { conversationId: data, error: null };
     } catch (error) {
         console.error('Error in getOrCreateDirectConversation:', error);
         return { conversationId: '', error: error as Error };
