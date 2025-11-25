@@ -13,7 +13,10 @@ interface MessageBubbleProps {
 
 export default function MessageBubble({ message, isOwn, senderName }: MessageBubbleProps) {
     const [isViewerOpen, setIsViewerOpen] = useState(false);
-    const { markAsViewed } = useMessages(undefined); // We only need markAsViewed here
+
+    // Safe usage of useMessages - only if we're in a real conversation
+    // For AI chat, we don't need markAsViewed logic from Supabase
+    const { markAsViewed } = useMessages(message.conversation_id === 'ai-chat' ? undefined : message.conversation_id);
 
     const handleViewOnceOpen = () => {
         if (!message.is_viewed) {
@@ -23,7 +26,7 @@ export default function MessageBubble({ message, isOwn, senderName }: MessageBub
 
     const handleViewOnceClose = () => {
         setIsViewerOpen(false);
-        if (message.is_view_once && !isOwn && !message.is_viewed) {
+        if (message.is_view_once && !isOwn && !message.is_viewed && message.conversation_id !== 'ai-chat') {
             markAsViewed(message);
         }
     };
@@ -43,7 +46,7 @@ export default function MessageBubble({ message, isOwn, senderName }: MessageBub
                     'max-w-[70%] rounded-2xl px-4 py-3 shadow-lg',
                     isOwn
                         ? 'bg-gradient-to-br from-primary via-accent to-secondary text-white shadow-glow'
-                        : 'glass-strong text-gray-100'
+                        : 'bg-white dark:bg-black/40 backdrop-blur-md text-gray-800 dark:text-gray-100 shadow-sm border border-gray-200 dark:border-white/5'
                 )}>
                     {!isOwn && senderName && (
                         <p className="text-xs font-semibold text-primary mb-1">{senderName}</p>
@@ -107,7 +110,7 @@ export default function MessageBubble({ message, isOwn, senderName }: MessageBub
 
                     <p className={clsx(
                         'text-xs mt-1.5',
-                        isOwn ? 'text-white/70' : 'text-gray-400'
+                        isOwn ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'
                     )}>
                         {format(new Date(message.created_at), 'HH:mm')}
                     </p>

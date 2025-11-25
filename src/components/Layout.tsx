@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
-import { LogOut, MessageSquare, Search } from 'lucide-react';
+import { LogOut, MessageSquare, Search, Bot } from 'lucide-react';
 import ConversationList from './ConversationList';
 import UserSearch from './UserSearch';
 import Aurora from './Aurora';
-import ProfileModal from './ProfileModal';
+
 import { useProfile } from '../hooks/useProfile';
+import TiltedCard from './TiltedCard';
+import { AnimatePresence } from 'framer-motion';
 
 export default function Layout() {
     const { signOut, user } = useAuth();
@@ -50,13 +52,26 @@ export default function Layout() {
                             Chatsy
                         </h1>
                     </div>
-                    <button
-                        onClick={() => setIsSearchOpen(true)}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-all duration-300 text-gray-400 hover:text-primary hover:shadow-glow"
-                        title="Search users"
-                    >
-                        <Search className="w-5 h-5" />
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => navigate('/ai-chat')}
+                            className="p-2 hover:bg-white/10 rounded-lg transition-all duration-300 text-gray-400 hover:text-primary hover:shadow-glow relative group"
+                            title="AI Assistant"
+                        >
+                            <Bot className="w-5 h-5" />
+                            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                            </span>
+                        </button>
+                        <button
+                            onClick={() => setIsSearchOpen(true)}
+                            className="p-2 hover:bg-white/10 rounded-lg transition-all duration-300 text-gray-400 hover:text-primary hover:shadow-glow"
+                            title="Search users"
+                        >
+                            <Search className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Conversation List */}
@@ -102,7 +117,37 @@ export default function Layout() {
             <UserSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
             {/* Profile Modal */}
-            <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+            <AnimatePresence>
+                {isProfileOpen && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                        onClick={() => setIsProfileOpen(false)}
+                    >
+                        <div onClick={(e) => e.stopPropagation()}>
+                            <TiltedCard
+                                imageSrc={profile?.avatar_url || `https://ui-avatars.com/api/?name=${user?.email?.split('@')[0]}&background=random`}
+                                altText="Profile Card"
+                                captionText={profile?.username || user?.email?.split('@')[0]}
+                                containerHeight="400px"
+                                containerWidth="300px"
+                                imageHeight="400px"
+                                imageWidth="300px"
+                                rotateAmplitude={12}
+                                scaleOnHover={1.05}
+                                showMobileWarning={false}
+                                showTooltip={true}
+                                displayOverlayContent={true}
+                                overlayContent={
+                                    <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent text-white">
+                                        <h3 className="text-2xl font-bold">{profile?.username || 'User'}</h3>
+                                        <p className="text-white/80">{user?.email}</p>
+                                    </div>
+                                }
+                            />
+                        </div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
