@@ -30,34 +30,47 @@ export async function getOrCreateDirectConversation(
     targetUserId: string
 ): Promise<{ conversationId: string; error: Error | null }> {
     try {
-        // First, check if a conversation already exists between these two users
-        const { data: existingConversations, error: fetchError } = await supabase
+        // 1. Get all conversation IDs for the current user
+        const { data: currentUserConvs, error: error1 } = await supabase
             .from('conversation_participants')
             .select('conversation_id')
             .eq('user_id', currentUserId);
 
-        if (fetchError) throw fetchError;
+        if (error1) throw error1;
 
-        if (existingConversations && existingConversations.length > 0) {
-            // Check which of these conversations also includes the target user
-            for (const conv of existingConversations) {
-                const { data: participants, error: participantError } = await supabase
-                    .from('conversation_participants')
-                    .select('user_id')
-                    .eq('conversation_id', conv.conversation_id);
+        const currentUserConvIds = currentUserConvs?.map(c => c.conversation_id) || [];
 
-                if (participantError) continue;
+        if (currentUserConvIds.length > 0) {
+            // 2. Check if the target user is in any of these conversations
+            // This is RLS-safe because we are querying conversations we are already part of
+            const { data: commonParticipants, error: error2 } = await supabase
+                .from('conversation_participants')
+                .select('conversation_id')
+                .in('conversation_id', currentUserConvIds)
+                .eq('user_id', targetUserId);
 
-                const userIds = participants?.map(p => p.user_id) || [];
+            if (error2) throw error2;
 
-                // If this conversation has exactly 2 participants and includes both users
-                if (userIds.length === 2 && userIds.includes(targetUserId)) {
-                    return { conversationId: conv.conversation_id, error: null };
+            const commonConvIds = commonParticipants?.map(c => c.conversation_id) || [];
+
+            if (commonConvIds.length > 0) {
+                // 3. Check if any of these are NOT a group chat
+                const { data: directConvs, error: error3 } = await supabase
+                    .from('conversations')
+                    .select('id')
+                    .in('id', commonConvIds)
+                    .eq('is_group', false)
+                    .limit(1);
+
+                if (error3) throw error3;
+
+                if (directConvs && directConvs.length > 0) {
+                    return { conversationId: directConvs[0].id, error: null };
                 }
             }
         }
 
-        // No existing conversation found, create a new one
+        // 4. Create new conversation
         const { data: newConversation, error: createError } = await supabase
             .from('conversations')
             .insert({ is_group: false })
@@ -66,7 +79,7 @@ export async function getOrCreateDirectConversation(
 
         if (createError) throw createError;
 
-        // Add both participants
+        // 5. Add participants
         const { error: participantsError } = await supabase
             .from('conversation_participants')
             .insert([
