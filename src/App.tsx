@@ -1,0 +1,43 @@
+
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './lib/AuthContext';
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
+import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import ChatWindow from './components/ChatWindow';
+
+// Placeholder for Chat Interface
+const ChatPlaceholder = () => (
+  <div className="h-full flex flex-col items-center justify-center text-gray-500 bg-dark/50 backdrop-blur-sm">
+    <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-bounce">
+      <span className="text-4xl">👋</span>
+    </div>
+    <h2 className="text-2xl font-bold text-white mb-2">Welcome to Chatsy</h2>
+    <p>Select a chat or search for a user to start messaging.</p>
+  </div>
+);
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/" element={<ChatPlaceholder />} />
+              <Route path="/c/:conversationId" element={<ChatWindow />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
