@@ -5,7 +5,7 @@ import { useMessages } from '../hooks/useMessages';
 import { getConversationParticipants, type Profile } from '../lib/conversationHelpers';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
-import { MoreVertical, Phone, Video, Loader2 } from 'lucide-react';
+import { MoreVertical, Phone, Video, Loader2, ArrowLeft } from 'lucide-react';
 
 export default function ChatWindow() {
     const { conversationId } = useParams();
@@ -56,6 +56,14 @@ export default function ChatWindow() {
             {/* Chat Header */}
             <div className="p-4 border-b border-white/5 bg-dark-light/50 backdrop-blur-md flex items-center justify-between z-10">
                 <div className="flex items-center gap-3">
+                    {/* Back Button (Mobile Only) */}
+                    <button
+                        onClick={() => window.history.back()}
+                        className="lg:hidden p-2 -ml-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary border border-white/10 relative overflow-hidden">
                         {otherUser?.avatar_url ? (
                             <img
