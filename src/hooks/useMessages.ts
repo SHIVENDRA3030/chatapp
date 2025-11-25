@@ -7,6 +7,10 @@ export interface Message {
     sender_id: string;
     content: string;
     created_at: string;
+    attachment_url?: string;
+    attachment_type?: 'image' | 'file';
+    is_view_once?: boolean;
+    is_viewed?: boolean;
 }
 
 export function useMessages(conversationId: string | undefined) {
@@ -29,20 +33,26 @@ export function useMessages(conversationId: string | undefined) {
             .on(
                 'postgres_changes',
                 {
-                    event: 'INSERT',
+                    event: '*', // Listen to all events (INSERT, UPDATE)
                     schema: 'public',
                     table: 'messages',
                     filter: `conversation_id=eq.${conversationId}`
                 },
                 (payload) => {
-                    // Add new message to the list if it doesn't exist
-                    const newMessage = payload.new as Message;
-                    setMessages((current) => {
-                        if (current.some(msg => msg.id === newMessage.id)) {
-                            return current;
-                        }
-                        return [...current, newMessage];
-                    });
+                    if (payload.eventType === 'INSERT') {
+                        const newMessage = payload.new as Message;
+                        setMessages((current) => {
+                            if (current.some(msg => msg.id === newMessage.id)) {
+                                return current;
+                            }
+                            return [...current, newMessage];
+                        });
+                    } else if (payload.eventType === 'UPDATE') {
+                        const updatedMessage = payload.new as Message;
+                        setMessages((current) =>
+                            current.map(msg => msg.id === updatedMessage.id ? updatedMessage : msg)
+                        );
+                    }
                 }
             )
             .subscribe();
@@ -75,16 +85,52 @@ export function useMessages(conversationId: string | undefined) {
         }
     }
 
-    async function sendMessage(content: string, senderId: string) {
+    async function uploadAttachment(file: File) {
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${conversationId}/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('chat-attachments')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data } = supabase.storage
+                .from('chat-attachments')
+                .getPublicUrl(filePath);
+
+            return { url: data.publicUrl, type: file.type.startsWith('image/') ? 'image' : 'file' };
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            throw error;
+        }
+    }
+
+    async function sendMessage(content: string, senderId: string, file?: File, isViewOnce: boolean = false) {
         if (!conversationId) return { error: new Error('No conversation ID') };
 
         try {
+            let attachment_url = null;
+            let attachment_type = null;
+
+            if (file) {
+                const uploadResult = await uploadAttachment(file);
+                attachment_url = uploadResult.url;
+                attachment_type = uploadResult.type;
+            }
+
             const { data, error: insertError } = await supabase
                 .from('messages')
                 .insert({
                     conversation_id: conversationId,
                     sender_id: senderId,
-                    content
+                    content,
+                    attachment_url,
+                    attachment_type,
+                    is_view_once: isViewOnce,
+                    is_viewed: false
                 })
                 .select()
                 .single();
@@ -92,7 +138,6 @@ export function useMessages(conversationId: string | undefined) {
             if (insertError) throw insertError;
 
             // Optimistically add the message to local state
-            // This makes it appear immediately for the sender
             if (data) {
                 setMessages((current) => [...current, data as Message]);
             }
@@ -104,5 +149,35 @@ export function useMessages(conversationId: string | undefined) {
         }
     }
 
-    return { messages, loading, error, sendMessage, refetch: fetchMessages };
+    async function markAsViewed(message: Message) {
+        try {
+            // 1. Update DB to set is_viewed = true
+            const { error: updateError } = await supabase
+                .from('messages')
+                .update({ is_viewed: true })
+                .eq('id', message.id);
+
+            if (updateError) throw updateError;
+
+            // 2. If it's a view-once message, delete the file from storage
+            if (message.is_view_once && message.attachment_url) {
+                // Extract path from URL
+                // URL format: .../storage/v1/object/public/chat-attachments/conversationId/filename
+                const url = new URL(message.attachment_url);
+                const pathParts = url.pathname.split('/chat-attachments/');
+                if (pathParts.length > 1) {
+                    const filePath = pathParts[1];
+                    const { error: deleteError } = await supabase.storage
+                        .from('chat-attachments')
+                        .remove([filePath]);
+
+                    if (deleteError) console.error('Error deleting view-once file:', deleteError);
+                }
+            }
+        } catch (err) {
+            console.error('Error marking message as viewed:', err);
+        }
+    }
+
+    return { messages, loading, error, sendMessage, markAsViewed, refetch: fetchMessages };
 }

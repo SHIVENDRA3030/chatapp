@@ -1,27 +1,94 @@
-import { useState } from 'react';
-import { Send, Smile, Paperclip } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Send, Smile, Paperclip, X, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChatInputProps {
-    onSend: (message: string) => void;
+    onSend: (message: string, file?: File, isViewOnce?: boolean) => void;
 }
 
 export default function ChatInput({ onSend }: ChatInputProps) {
     const [message, setMessage] = useState('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isViewOnce, setIsViewOnce] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (message.trim()) {
-            onSend(message);
+        if (message.trim() || selectedFile) {
+            onSend(message, selectedFile || undefined, isViewOnce);
             setMessage('');
+            setSelectedFile(null);
+            setIsViewOnce(false);
+        }
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setSelectedFile(e.target.files[0]);
         }
     };
 
     return (
         <form onSubmit={handleSubmit} className="p-4 glass-strong border-t border-white/10">
+            {selectedFile && (
+                <div className="mb-4 p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
+                            {selectedFile.type.startsWith('image/') ? (
+                                <img
+                                    src={URL.createObjectURL(selectedFile)}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <Paperclip className="w-5 h-5 text-gray-400" />
+                            )}
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-sm text-white truncate max-w-[200px]">{selectedFile.name}</span>
+                            <span className="text-xs text-gray-400">{(selectedFile.size / 1024).toFixed(1)} KB</span>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {selectedFile.type.startsWith('image/') && (
+                            <button
+                                type="button"
+                                onClick={() => setIsViewOnce(!isViewOnce)}
+                                className={`p-2 rounded-full transition-all ${isViewOnce
+                                        ? 'bg-primary text-white'
+                                        : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                                    }`}
+                                title="View Once"
+                            >
+                                {isViewOnce ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSelectedFile(null);
+                                setIsViewOnce(false);
+                                if (fileInputRef.current) fileInputRef.current.value = '';
+                            }}
+                            className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-red-400 transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="flex items-center gap-3">
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    accept="image/*,application/pdf,.doc,.docx"
+                />
                 <button
                     type="button"
+                    onClick={() => fileInputRef.current?.click()}
                     className="p-2.5 rounded-xl hover:bg-white/10 text-gray-400 hover:text-primary transition-all duration-300 hover:scale-110"
                 >
                     <Paperclip className="w-5 h-5" />
@@ -45,7 +112,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
                 </button>
 
                 <AnimatePresence>
-                    {message.trim() && (
+                    {(message.trim() || selectedFile) && (
                         <motion.button
                             initial={{ scale: 0, rotate: -180 }}
                             animate={{ scale: 1, rotate: 0 }}

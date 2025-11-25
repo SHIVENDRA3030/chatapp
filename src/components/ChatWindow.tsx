@@ -38,9 +38,9 @@ export default function ChatWindow() {
         scrollToBottom();
     }, [messages]);
 
-    const handleSendMessage = async (content: string) => {
+    const handleSendMessage = async (content: string, file?: File, isViewOnce?: boolean) => {
         if (!user) return;
-        await sendMessage(content, user.id);
+        await sendMessage(content, user.id, file, isViewOnce);
     };
 
     if (loadingParticipants) {
@@ -108,9 +108,8 @@ export default function ChatWindow() {
                     messages.map((msg) => (
                         <MessageBubble
                             key={msg.id}
-                            content={msg.content}
+                            message={msg}
                             isOwn={msg.sender_id === user?.id}
-                            timestamp={msg.created_at}
                         />
                     ))
                 )}
