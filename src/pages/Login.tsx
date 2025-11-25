@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
+import { GridScan } from '../components/GridScan';
 
 export default function Login() {
     const [username, setUsername] = useState('');
@@ -32,15 +33,27 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-dark p-4 relative overflow-hidden">
-            {/* Background Blobs */}
-            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/30 rounded-full blur-3xl opacity-50 animate-pulse" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-secondary/30 rounded-full blur-3xl opacity-50 animate-pulse" />
+        <div className="min-h-screen flex items-center justify-center bg-dark relative overflow-hidden">
+            {/* GridScan Background */}
+            <div className="absolute inset-0 z-0">
+                <GridScan
+                    sensitivity={0.55}
+                    lineThickness={1}
+                    linesColor="#392e4e"
+                    gridScale={0.1}
+                    scanColor="#FF9FFC"
+                    scanOpacity={0.4}
+                    enablePost
+                    bloomIntensity={0.6}
+                    chromaticAberration={0.002}
+                    noiseIntensity={0.01}
+                />
+            </div>
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl w-full max-w-md shadow-xl z-10"
+                className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl w-full max-w-md shadow-xl z-10 m-4"
             >
                 <div className="flex justify-center mb-6">
                     <div className="p-3 bg-gradient-to-br from-primary to-secondary rounded-xl shadow-lg">
