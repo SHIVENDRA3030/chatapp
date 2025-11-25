@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { Outlet, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
 import { LogOut, MessageSquare, Search, Bot } from 'lucide-react';
 import ConversationList from './ConversationList';
@@ -14,6 +14,7 @@ export default function Layout() {
     const { signOut, user } = useAuth();
     const { profile } = useProfile();
     const navigate = useNavigate();
+    const location = useLocation();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -25,8 +26,9 @@ export default function Layout() {
     const { conversationId } = useParams();
 
     // Mobile view logic
-    const showSidebar = !conversationId;
-    const showChat = !!conversationId;
+    const isAIChat = location.pathname === '/ai-chat';
+    const showSidebar = !conversationId && !isAIChat;
+    const showChat = !!conversationId || isAIChat;
 
     return (
         <div className="flex h-screen relative text-white overflow-hidden">

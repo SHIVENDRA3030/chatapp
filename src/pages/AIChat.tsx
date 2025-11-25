@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 import { useAIChat } from '../hooks/useAIChat';
 import ChatInput from '../components/ChatInput';
 import MessageBubble from '../components/MessageBubble';
-import { Bot, Trash2, FileText } from 'lucide-react';
+import { Bot, Trash2, FileText, ArrowLeft } from 'lucide-react';
 import { type Message } from '../hooks/useMessages';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Vortex } from '../components/ui/vortex';
@@ -43,6 +43,14 @@ function AIChatContent() {
                 {/* Header */}
                 <div className="bg-white/80 dark:bg-black/40 backdrop-blur-md p-4 shadow-sm flex items-center justify-between z-10 border-b border-gray-200/50 dark:border-white/5">
                     <div className="flex items-center gap-3">
+                        {/* Back Button (Mobile Only) */}
+                        <button
+                            onClick={() => window.history.back()}
+                            className="lg:hidden p-2 -ml-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg">
                             <Bot size={24} />
                         </div>
@@ -118,7 +126,7 @@ function AIChatContent() {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-4 bg-white/80 dark:bg-black/40 backdrop-blur-md border-t border-gray-100 dark:border-white/5 z-10">
+                <div className="p-4 pb-6 lg:pb-4 bg-white/80 dark:bg-black/40 backdrop-blur-md border-t border-gray-100 dark:border-white/5 z-10">
                     <ChatInput
                         onSend={sendMessage}
                         disabled={isLoading}
