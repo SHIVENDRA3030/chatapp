@@ -35,8 +35,14 @@ export function useMessages(conversationId: string | undefined) {
                     filter: `conversation_id=eq.${conversationId}`
                 },
                 (payload) => {
-                    // Add new message to the list
-                    setMessages((current) => [...current, payload.new as Message]);
+                    // Add new message to the list if it doesn't exist
+                    const newMessage = payload.new as Message;
+                    setMessages((current) => {
+                        if (current.some(msg => msg.id === newMessage.id)) {
+                            return current;
+                        }
+                        return [...current, newMessage];
+                    });
                 }
             )
             .subscribe();
