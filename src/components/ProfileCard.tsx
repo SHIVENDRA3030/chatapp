@@ -63,7 +63,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                                 e.stopPropagation(); // Prevent card tilt interference if needed
                                 onContactClick?.();
                             }}
-                            className="w-full py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl text-sm font-semibold text-white transition-all border border-white/10 hover:border-white/30 shadow-lg active:scale-95"
+                            className="w-full py-2.5 bg-primary hover:bg-primary/80 backdrop-blur-md rounded-xl text-sm font-semibold text-white transition-all shadow-lg active:scale-95"
                         >
                             {contactText}
                         </button>

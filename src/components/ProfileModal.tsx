@@ -15,19 +15,26 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     const { user } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [newAvatarUrl, setNewAvatarUrl] = useState('');
+    const [username, setUsername] = useState('');
     const [updating, setUpdating] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleUpdateAvatar = async () => {
-        if (!newAvatarUrl.trim()) return;
+    const handleSaveProfile = async () => {
+        if (!username.trim() && !newAvatarUrl.trim()) return;
 
         setUpdating(true);
-        const { error } = await updateProfile({ avatar_url: newAvatarUrl });
+        const updates: any = {};
+        if (username.trim()) updates.username = username;
+        if (newAvatarUrl.trim()) updates.avatar_url = newAvatarUrl;
+
+        const { error } = await updateProfile(updates);
         setUpdating(false);
 
         if (!error) {
             setIsEditing(false);
             setNewAvatarUrl('');
+        } else {
+            alert('Failed to save profile: ' + error.message);
         }
     };
 
@@ -42,6 +49,8 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
         if (!error) {
             setIsEditing(false);
+        } else {
+            alert('Failed to update profile: ' + error.message);
         }
     };
 
@@ -79,8 +88,13 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                 handle={profile?.username || 'user'}
                                 status="Online"
                                 avatarUrl={avatarUrl}
-                                contactText={isEditing ? "Close" : "Change Photo"}
-                                onContactClick={() => setIsEditing(!isEditing)}
+                                contactText={isEditing ? "Close" : "Edit Profile"}
+                                onContactClick={() => {
+                                    if (!isEditing) {
+                                        setUsername(profile?.username || '');
+                                    }
+                                    setIsEditing(!isEditing);
+                                }}
                                 enableTilt={true}
                                 showUserInfo={true}
                             />
@@ -93,6 +107,17 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                 >
                                     <div className="flex flex-col gap-4">
                                         <div>
+                                            <label className="block text-xs text-gray-400 mb-2">Username</label>
+                                            <input
+                                                type="text"
+                                                value={username}
+                                                onChange={(e) => setUsername(e.target.value)}
+                                                placeholder="Enter username"
+                                                className="w-full bg-dark/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/50"
+                                            />
+                                        </div>
+
+                                        <div>
                                             <label className="block text-xs text-gray-400 mb-2">Upload Photo</label>
                                             <input
                                                 type="file"
@@ -104,7 +129,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                             <button
                                                 onClick={() => fileInputRef.current?.click()}
                                                 disabled={updating}
-                                                className="w-full py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg text-sm text-white transition-colors flex items-center justify-center gap-2"
+                                                className="w-full py-2 bg-primary hover:bg-primary/80 rounded-lg text-sm text-white transition-colors flex items-center justify-center gap-2"
                                             >
                                                 {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
                                                 {updating ? 'Uploading...' : 'Choose File'}
@@ -131,8 +156,8 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                                                     className="flex-1 bg-dark/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/50"
                                                 />
                                                 <button
-                                                    onClick={handleUpdateAvatar}
-                                                    disabled={updating || !newAvatarUrl.trim()}
+                                                    onClick={handleSaveProfile}
+                                                    disabled={updating || (!newAvatarUrl.trim() && !username.trim())}
                                                     className="p-2 bg-primary rounded-lg text-white disabled:opacity-50 hover:bg-primary/80 transition-colors"
                                                 >
                                                     {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
