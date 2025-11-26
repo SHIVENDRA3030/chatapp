@@ -34,32 +34,38 @@ export default function MessageBubble({ message, isOwn, senderName }: MessageBub
     return (
         <>
             <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
+                transition={{
+                    duration: 0.4,
+                    ease: [0.4, 0, 0.2, 1],
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 25
+                }}
                 className={clsx(
                     'flex w-full mb-3',
                     isOwn ? 'justify-end' : 'justify-start'
                 )}
             >
                 <div className={clsx(
-                    'max-w-[70%] rounded-2xl px-4 py-3 shadow-lg',
+                    'max-w-[70%] rounded-2xl px-4 py-3 shadow-elevation-md transition-all duration-300',
                     isOwn
-                        ? 'bg-gradient-to-br from-primary via-accent to-secondary text-white shadow-glow'
-                        : 'bg-white dark:bg-black/40 backdrop-blur-md text-gray-800 dark:text-gray-100 shadow-sm border border-gray-200 dark:border-white/5'
+                        ? 'bg-gradient-to-br from-primary-500 via-accent-500 to-secondary-500 text-white shadow-glow-lg hover:shadow-glow-xl'
+                        : 'glass-strong text-gray-800 dark:text-gray-100 border border-white/10 hover:border-white/20 interactive-lift'
                 )}>
                     {!isOwn && senderName && (
-                        <p className="text-xs font-semibold text-primary mb-1">{senderName}</p>
+                        <p className="text-xs font-semibold text-primary-400 mb-1.5">{senderName}</p>
                     )}
 
                     {/* Attachment Rendering */}
                     {message.attachment_url && (
-                        <div className="mb-2">
+                        <div className="mb-2.5">
                             {message.is_view_once ? (
-                                <div className="flex items-center gap-3 bg-black/20 p-3 rounded-lg">
+                                <div className="flex items-center gap-3 bg-black/25 p-3.5 rounded-xl transition-all duration-300 hover:bg-black/30">
                                     <div className={clsx(
-                                        "p-2 rounded-full",
-                                        message.is_viewed ? "bg-gray-500/20 text-gray-400" : "bg-primary/20 text-primary"
+                                        "p-2.5 rounded-full transition-all duration-300",
+                                        message.is_viewed ? "bg-gray-500/20 text-gray-400" : "bg-primary/30 text-primary-200 shadow-glow"
                                     )}>
                                         {message.is_viewed ? <Bomb className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </div>
@@ -70,7 +76,7 @@ export default function MessageBubble({ message, isOwn, senderName }: MessageBub
                                         {!message.is_viewed && (
                                             <button
                                                 onClick={handleViewOnceOpen}
-                                                className="text-xs text-left hover:underline mt-0.5"
+                                                className="text-xs text-left hover:underline mt-0.5 font-medium"
                                             >
                                                 Click to view
                                             </button>
@@ -81,7 +87,7 @@ export default function MessageBubble({ message, isOwn, senderName }: MessageBub
                                 <img
                                     src={message.attachment_url}
                                     alt="Attachment"
-                                    className="rounded-lg max-h-60 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                    className="rounded-xl max-h-60 object-cover cursor-pointer transition-all duration-300 hover:opacity-90 hover:scale-[1.02] shadow-elevation-sm"
                                     onClick={() => setIsViewerOpen(true)}
                                 />
                             ) : (
@@ -89,9 +95,9 @@ export default function MessageBubble({ message, isOwn, senderName }: MessageBub
                                     href={message.attachment_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-3 bg-black/20 p-3 rounded-lg hover:bg-black/30 transition-colors"
+                                    className="flex items-center gap-3 bg-black/20 p-3.5 rounded-xl hover:bg-black/30 transition-all duration-300 interactive-lift"
                                 >
-                                    <div className="p-2 bg-white/10 rounded-lg">
+                                    <div className="p-2.5 bg-white/10 rounded-lg">
                                         <FileText className="w-6 h-6" />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -109,8 +115,8 @@ export default function MessageBubble({ message, isOwn, senderName }: MessageBub
                     )}
 
                     <p className={clsx(
-                        'text-xs mt-1.5',
-                        isOwn ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'
+                        'text-xs mt-2 font-medium',
+                        isOwn ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'
                     )}>
                         {format(new Date(message.created_at), 'HH:mm')}
                     </p>

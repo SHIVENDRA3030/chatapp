@@ -43,35 +43,35 @@ export default function Layout() {
             </div>
 
             {/* Sidebar */}
-            <aside className={`${showSidebar ? 'flex' : 'hidden'} lg:flex w-full lg:w-80 glass-strong border-r border-white/10 flex-col backdrop-blur-xl relative z-10 h-full`}>
+            <aside className={`${showSidebar ? 'flex' : 'hidden'} lg:flex w-full lg:w-80 glass-frosted border-r border-white/20 flex-col backdrop-blur-xl relative z-10 h-full shadow-elevation-lg`}>
                 {/* Header */}
-                <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                <div className="p-4 border-b border-white/10 flex items-center justify-between backdrop-blur-md">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary via-accent to-secondary rounded-xl flex items-center justify-center shadow-glow">
+                        <div className="w-10 h-10 bg-gradient-to-br from-primary via-accent to-secondary rounded-xl flex items-center justify-center shadow-glow-lg animate-pulse-glow">
                             <MessageSquare className="w-6 h-6 text-white" />
                         </div>
-                        <h1 className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+                        <h1 className="text-xl font-display font-bold bg-gradient-to-r from-primary-400 via-accent-400 to-secondary-400 bg-clip-text text-transparent gradient-animate">
                             Chatsy
                         </h1>
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={() => navigate('/ai-chat')}
-                            className="p-2 hover:bg-white/10 rounded-lg transition-all duration-300 text-gray-400 hover:text-primary hover:shadow-glow relative group"
+                            className="p-2 hover:bg-white/10 rounded-lg transition-all duration-300 text-gray-400 hover:text-primary hover:shadow-glow-lg hover:scale-110 active:scale-95 relative group"
                             title="AI Assistant"
                         >
-                            <Bot className="w-5 h-5" />
+                            <Bot className="w-5 h-5 transition-transform group-hover:rotate-12" />
                             <span className="absolute -top-1 -right-1 flex h-3 w-3">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-gradient-to-br from-primary to-accent shadow-glow"></span>
                             </span>
                         </button>
                         <button
                             onClick={() => setIsSearchOpen(true)}
-                            className="p-2 hover:bg-white/10 rounded-lg transition-all duration-300 text-gray-400 hover:text-primary hover:shadow-glow"
+                            className="p-2 hover:bg-white/10 rounded-lg transition-all duration-300 text-gray-400 hover:text-primary hover:shadow-glow-lg hover:scale-110 active:scale-95"
                             title="Search users"
                         >
-                            <Search className="w-5 h-5" />
+                            <Search className="w-5 h-5 transition-transform hover:rotate-90" />
                         </button>
                     </div>
                 </div>
@@ -80,32 +80,35 @@ export default function Layout() {
                 <ConversationList />
 
                 {/* User Profile & Logout */}
-                <div className="p-4 border-t border-white/10 glass mt-auto">
+                <div className="p-4 border-t border-white/10 glass-strong mt-auto">
                     <div
                         onClick={() => setIsProfileOpen(true)}
-                        className="flex items-center gap-3 mb-4 cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-colors"
+                        className="flex items-center gap-3 mb-4 cursor-pointer hover:bg-white/10 p-3 rounded-xl transition-all duration-300 interactive-lift group"
                     >
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden border-2 border-primary/50 shadow-glow">
-                            <img
-                                src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${user?.email?.split('@')[0]}&background=random`}
-                                alt="Profile"
-                                className="w-full h-full object-cover"
-                            />
+                        <div className="relative">
+                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary via-accent to-secondary overflow-hidden border-2 border-primary/50 shadow-glow-lg group-hover:shadow-glow-xl transition-all duration-300">
+                                <img
+                                    src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${user?.email?.split('@')[0]}&background=random`}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                />
+                            </div>
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 border-2 border-dark-light animate-pulse-slow shadow-lg shadow-green-400/50"></div>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{profile?.username || user?.email?.split('@')[0]}</p>
+                            <p className="text-sm font-semibold truncate group-hover:text-primary-300 transition-colors">{profile?.username || user?.email?.split('@')[0]}</p>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse-slow"></div>
-                                <p className="text-xs text-gray-400">Online</p>
+                                <p className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">Online</p>
                             </div>
                         </div>
                     </div>
                     <button
                         onClick={handleSignOut}
-                        className="w-full flex items-center justify-center lg:justify-start gap-3 p-3 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-all duration-300 group"
+                        className="w-full flex items-center justify-center lg:justify-start gap-3 p-3 rounded-xl hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-all duration-300 group border border-transparent hover:border-red-500/20"
                     >
-                        <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        <span className="inline">Sign Out</span>
+                        <LogOut className="w-5 h-5 group-hover:scale-110 group-hover:-rotate-12 transition-all duration-300" />
+                        <span className="font-medium">Sign Out</span>
                     </button>
                 </div>
             </aside>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Loader2 } from 'lucide-react';
 
 export default function SignUp() {
     const [username, setUsername] = useState('');
@@ -57,41 +57,47 @@ export default function SignUp() {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white/5 backdrop-blur-lg border border-white/10 p-8 rounded-2xl w-full max-w-md shadow-xl z-10"
+                className="glass-frosted border border-white/20 p-8 rounded-3xl w-full max-w-md shadow-elevation-xl z-10"
             >
                 <div className="flex justify-center mb-6">
-                    <div className="p-3 bg-gradient-to-br from-secondary to-primary rounded-xl shadow-lg">
+                    <div className="p-4 bg-gradient-to-br from-secondary via-accent to-primary rounded-2xl shadow-glow-lg animate-float">
                         <UserPlus className="w-8 h-8 text-white" />
                     </div>
                 </div>
-                <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">Join Chatsy</h2>
-                <p className="text-gray-400 text-center mb-8">Create your unique username</p>
+                <h2 className="text-3xl font-display font-bold text-center mb-2 text-gradient-vivid animate-gradient-shift">
+                    Join Chatsy
+                </h2>
+                <p className="text-gray-400 text-center mb-8 font-medium">Create your unique username</p>
 
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg mb-4 text-sm text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="glass-strong border border-red-500/30 text-red-400 p-3.5 rounded-xl mb-4 text-sm text-center font-medium shadow-elevation-sm"
+                    >
                         {error}
-                    </div>
+                    </motion.div>
                 )}
 
-                <form onSubmit={handleSignUp} className="space-y-4">
+                <form onSubmit={handleSignUp} className="space-y-5">
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">Username</label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full bg-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all"
+                            className="w-full glass-strong border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-secondary/50 focus:shadow-glow transition-all duration-300 placeholder-gray-500"
                             placeholder="Choose a unique username"
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <label className="block text-sm font-semibold text-gray-300 mb-2">Password</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-secondary/50 transition-all"
+                            className="w-full glass-strong border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-secondary/50 focus:shadow-glow transition-all duration-300 placeholder-gray-500"
                             placeholder="Create a password"
                             required
                         />
@@ -99,15 +105,23 @@ export default function SignUp() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-secondary to-primary text-white font-bold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg shadow-secondary/20"
+                        className="w-full bg-gradient-to-r from-secondary-500 via-accent-500 to-primary-500 text-white font-bold py-3.5 rounded-xl hover:opacity-90 transition-all duration-300 disabled:opacity-50 shadow-glow-lg hover:shadow-glow-xl hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group"
                     >
-                        {loading ? 'Creating Account...' : 'Sign Up'}
+                        {loading ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Creating Account...
+                            </span>
+                        ) : (
+                            'Sign Up'
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </button>
                 </form>
 
                 <div className="mt-6 text-center text-sm text-gray-400">
                     Already have an account?{' '}
-                    <Link to="/login" className="text-secondary hover:text-primary transition-colors font-medium">
+                    <Link to="/login" className="text-secondary-400 hover:text-primary-400 transition-colors font-semibold">
                         Login
                     </Link>
                 </div>

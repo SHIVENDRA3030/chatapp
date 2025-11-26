@@ -31,11 +31,15 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
     };
 
     return (
-        <form onSubmit={handleSubmit} className="p-4 bg-white/80 dark:bg-black/40 backdrop-blur-xl border-t border-gray-200 dark:border-white/5">
+        <form onSubmit={handleSubmit} className="p-4 glass-frosted border-t border-white/10 backdrop-blur-xl shadow-elevation-lg">
             {selectedFile && (
-                <div className="mb-4 p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-3 p-3.5 glass-strong rounded-xl border border-white/10 flex items-center justify-between"
+                >
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
+                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden shadow-inner">
                             {selectedFile.type.startsWith('image/') ? (
                                 <img
                                     src={URL.createObjectURL(selectedFile)}
@@ -47,7 +51,7 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
                             )}
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-sm text-white truncate max-w-[200px]">{selectedFile.name}</span>
+                            <span className="text-sm text-white truncate max-w-[200px] font-medium">{selectedFile.name}</span>
                             <span className="text-xs text-gray-400">{(selectedFile.size / 1024).toFixed(1)} KB</span>
                         </div>
                     </div>
@@ -56,9 +60,9 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
                             <button
                                 type="button"
                                 onClick={() => setIsViewOnce(!isViewOnce)}
-                                className={`p-2 rounded-full transition-all ${isViewOnce
-                                    ? 'bg-primary text-white'
-                                    : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                                className={`p-2.5 rounded-full transition-all duration-300 hover:scale-110 ${isViewOnce
+                                        ? 'bg-gradient-to-br from-primary to-accent text-white shadow-glow'
+                                        : 'bg-white/10 text-gray-400 hover:bg-white/20'
                                     }`}
                                 title="View Once"
                             >
@@ -72,12 +76,12 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
                                 setIsViewOnce(false);
                                 if (fileInputRef.current) fileInputRef.current.value = '';
                             }}
-                            className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-red-400 transition-colors"
+                            className="p-2.5 hover:bg-red-500/20 rounded-full text-gray-400 hover:text-red-400 transition-all duration-300 hover:rotate-90 hover:scale-110"
                         >
                             <X className="w-4 h-4" />
                         </button>
                     </div>
-                </div>
+                </motion.div>
             )}
 
             <div className="flex items-center gap-3">
@@ -91,9 +95,9 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
                 <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2.5 rounded-xl hover:bg-white/10 text-gray-400 hover:text-primary transition-all duration-300 hover:scale-110"
+                    className="p-3 rounded-xl hover:bg-white/10 text-gray-400 hover:text-primary transition-all duration-300 hover:scale-110 active:scale-95 group"
                 >
-                    <Paperclip className="w-5 h-5" />
+                    <Paperclip className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 </button>
 
                 <div className="flex-1 relative">
@@ -103,30 +107,31 @@ export default function ChatInput({ onSend, disabled, placeholder }: ChatInputPr
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder={placeholder || "Type a message..."}
                         disabled={disabled}
-                        className="w-full px-4 py-3 bg-dark-lighter/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:shadow-glow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-3 glass-strong border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 focus:shadow-glow transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                 </div>
 
                 <button
                     type="button"
                     disabled={disabled}
-                    className="p-2.5 rounded-xl hover:bg-white/10 text-gray-400 hover:text-secondary transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-3 rounded-xl hover:bg-white/10 text-gray-400 hover:text-secondary transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                    <Smile className="w-5 h-5" />
+                    <Smile className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 </button>
 
                 <AnimatePresence>
                     {(message.trim() || selectedFile) && (
                         <motion.button
-                            initial={{ scale: 0, rotate: -180 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            exit={{ scale: 0, rotate: 180 }}
-                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            initial={{ scale: 0, rotate: -180, opacity: 0 }}
+                            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                            exit={{ scale: 0, rotate: 180, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                             type="submit"
                             disabled={disabled}
-                            className="p-3 rounded-xl bg-gradient-to-br from-primary via-accent to-secondary text-white shadow-glow hover:shadow-glow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-3.5 rounded-xl bg-gradient-to-br from-primary-500 via-accent-500 to-secondary-500 text-white shadow-glow-lg hover:shadow-glow-xl transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
                         >
-                            <Send className="w-5 h-5" />
+                            <Send className="w-5 h-5 relative z-10 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </motion.button>
                     )}
                 </AnimatePresence>
