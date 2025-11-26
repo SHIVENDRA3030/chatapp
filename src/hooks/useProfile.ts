@@ -44,7 +44,7 @@ export function useProfile() {
     }, [user]);
 
     const updateProfile = async (updates: Partial<Profile>) => {
-        if (!user) return;
+        if (!user) return { error: new Error('No user logged in') };
 
         try {
             const { error } = await supabase

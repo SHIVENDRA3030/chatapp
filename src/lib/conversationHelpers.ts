@@ -26,7 +26,6 @@ export interface ConversationWithDetails extends Conversation {
  * Get or create a direct conversation between two users
  */
 export async function getOrCreateDirectConversation(
-    currentUserId: string,
     targetUserId: string
 ): Promise<{ conversationId: string; error: Error | null }> {
     try {

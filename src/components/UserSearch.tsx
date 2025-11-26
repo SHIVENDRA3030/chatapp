@@ -38,7 +38,7 @@ export default function UserSearch({ isOpen, onClose }: UserSearchProps) {
         if (!user) return;
 
         setCreating(targetUser.id);
-        const { conversationId, error } = await getOrCreateDirectConversation(user.id, targetUser.id);
+        const { conversationId, error } = await getOrCreateDirectConversation(targetUser.id);
 
         if (error) {
             console.error('Error creating conversation:', error);
